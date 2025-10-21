@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .enabled { background-color: #28a745; color: white; }
+        .disabled { background-color: #dc3545; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f3f5;
+            font-weight: bold;
+        }
+        tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <a th:href="@{/home}"
+       style="padding: 10px 20px; background-color: #3498db; color: white;
+              text-decoration: none; border-radius: 6px; font-weight: bold;">
+        Начало
+    </a>
+</div>
+
+<div class="container">
+    <h1>Notification Settings</h1>
+
+    <!-- Reservation Notification Toggle -->
+    <form th:action="@{/notifications/preferences/reservations}" th:method="PUT">
+        <button type="submit" th:class="${notificationPreference.reservationEnabled} ? 'enabled' : 'disabled'">
+            <span th:text="${notificationPreference.reservationEnabled} ? 'Reservation OFF' : 'Reservation ON'"></span>
+        </button>
+    </form>
+
+    <!-- Product Notification Toggle -->
+    <form th:action="@{/notifications/preferences/products}" th:method="PUT">
+        <button type="submit" th:class="${notificationPreference.productEnabled} ? 'enabled' : 'disabled'">
+            <span th:text="${notificationPreference.productEnabled} ? 'Product OFF' : 'Product ON'"></span>
+        </button>
+    </form>
+
+    <!-- Contact Info Display -->
+    <div style="margin-top: 20px;">
+        <strong>Contact Info:</strong> <span th:text="${notificationPreference.contactInfo}"></span>
+    </div>
+
+    <!-- Notification History -->
+    <h2>Notification History</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Created On</th>
+            <th>Subject</th>
+            <th>Type</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="notification : ${notificationHistory}">
+            <td th:text="${#temporals.format(notification.createdOn, 'dd MMM YYYY HH:mm')}"></td>
+            <td th:text="${notification.subject}"></td>
+            <td th:text="${notification.type}"></td>
+            <td th:text="${notification.status}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <form th:action="@{/notifications/clear}" th:method="PUT" style="margin-top: 20px;">
+        <button type="submit" style="background-color:#ffc107; color:white; padding:12px 24px; border:none; border-radius:6px; cursor:pointer;">
+            Clear Notifications
+        </button>
+    </form>
+
+    <form th:action="@{/notifications/show}" th:method="PUT" style="margin-top: 10px;">
+        <button type="submit" style="background-color:#17a2b8; color:white; padding:12px 24px; border:none; border-radius:6px; cursor:pointer;">
+            Show Notifications
+        </button>
+    </form>
+</div>
+</body>
+</html>

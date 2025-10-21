@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Грешка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          color: #fff;
+          text-align: center;
+          overflow: hidden;
+        }
+
+        .container {
+          max-width: 700px;
+          padding: 40px;
+          border-radius: 20px;
+          background: rgba(255,255,255,0.1);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          backdrop-filter: blur(8px);
+          animation: fadeIn 1.2s ease forwards;
+        }
+
+        h1 {
+          font-size: 5rem;
+          margin-bottom: 15px;
+          animation: float 2.5s infinite ease-in-out;
+        }
+
+        h2 {
+          font-size: 2rem;
+          margin-bottom: 20px;
+        }
+
+        .exception {
+          margin: 20px 0;
+          padding: 15px;
+          border-radius: 10px;
+          background: rgba(0,0,0,0.3);
+          font-size: 1.2rem;
+          word-break: break-word;
+          white-space: pre-wrap;
+        }
+
+        a {
+          display: inline-block;
+          padding: 12px 25px;
+          margin-top: 20px;
+          border: 2px solid #fff;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 50px;
+          transition: all 0.3s ease;
+        }
+
+        a:hover {
+          background: #fff;
+          color: #764ba2;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+        }
+
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(-30px);}
+          100% { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Грешка!</h1>
+    <h2>Нещо се обърка...</h2>
+
+    <!-- Exception name/message ще се вкарва от контролера -->
+    <div class="exception" th:text="${errorMessage}">Exception details here</div>
+
+    <a th:href="@{/home}">Върни се към началната страница</a>
+</div>
+</body>
+</html>

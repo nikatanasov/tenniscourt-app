@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Добави продукт</title>
+    <meta charset="UTF-8" />
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        form {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .error-message {
+            color: #d93025;
+            font-size: 13px;
+            margin-top: -12px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<form th:action="@{/products/add}" th:object="${addNewProductRequest}" th:method="post">
+    <h1>Добави нов продукт</h1>
+
+    <label for="name">Име</label>
+    <input type="text" id="name" th:field="*{name}" placeholder="Въведи име на продукта" />
+    <div class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+
+    <label for="price">Цена</label>
+    <input type="number" step="0.01" id="price" th:field="*{price}" placeholder="Въведи цена в лева" />
+    <div class="error-message" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+
+    <label for="quantity">Количество</label>
+    <input type="number" id="quantity" th:field="*{quantity}" placeholder="Въведи количество" />
+    <div class="error-message" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+
+    <label for="imageUrl">URL на снимка</label>
+    <input type="text" id="imageUrl" th:field="*{imageUrl}" placeholder="Въведи URL на изображението" />
+    <div class="error-message" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></div>
+
+    <label for="productCategory">Категория</label>
+    <select id="productCategory" th:field = "*{productCategory}">
+        <option th:each = "category : ${T(app.product.model.ProductCategory).values()}" th:value="${category}" th:text = "${#strings.capitalize(#strings.toLowerCase(category))}"></option>
+    </select>
+
+    <button type="submit">Добави продукт</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Портмоне</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .wallet-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        .balance {
+            font-size: 2rem;
+            color: #27ae60;
+            margin: 20px 0;
+        }
+
+        form button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 20px;">
+    <a th:href="@{/home}"
+       style="padding: 10px 20px; background-color: #3498db; color: white;
+              text-decoration: none; border-radius: 6px; font-weight: bold;">
+        Начало
+    </a>
+</div>
+<div class="wallet-container">
+    <h1>Портмоне</h1>
+    <div class="balance">
+        Баланс: <span th:text="${wallet.balance}">0.00</span> лв.
+    </div>
+    <form th:action="@{/wallet/money-add}" th:method="post">
+        <button type="submit">Добави 30 лв.</button>
+    </form>
+</div>
+</body>
+</html>

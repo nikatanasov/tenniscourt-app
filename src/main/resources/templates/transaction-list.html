@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Transaction List</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f8;
+            margin: 40px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: #3498db;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f9ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .no-value {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<h1 style="position: relative;">
+    Transaction List
+    <a th:href="@{/home}"
+       style="float: right; padding: 8px 16px; background-color: #4CAF50;
+              color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        Начало
+    </a>
+</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Description</th>
+        <th>Failure Reason</th>
+        <th>Created On</th>
+        <th>Owner</th>
+        <th>Products</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="transaction : ${transactions}">
+        <td th:text="${transaction.id}">UUID</td>
+        <td th:text="${transaction.amount}">Amount</td>
+        <td th:text="${transaction.type}">Type</td>
+        <td th:text="${transaction.status}">Status</td>
+        <td th:text="${transaction.description}">Description</td>
+        <td th:text="${transaction.failureReason != null ? transaction.failureReason : '-'}"></td>
+        <td th:text="${#temporals.format(transaction.createdOn, 'dd MMM YYYY HH:mm')}">Created On</td>
+        <td th:text="${transaction.owner != null ? transaction.owner.username : '-'}">Owner</td>
+        <td>
+            <ul>
+                <li th:each="product : ${transaction.products}" th:text="${product.name}">Product</li>
+            </ul>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

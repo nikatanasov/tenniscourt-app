@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Резервации за следващите 7 дни</title>
+</head>
+<body>
+<h1>Резервации за следващите 7 дни</h1>
+
+<div th:if="${#maps.isEmpty(reservations)}">
+    <p>Няма резервации за този период.</p>
+</div>
+
+<div th:unless="${#maps.isEmpty(reservations)}">
+    <div th:each="entry : ${reservations}">
+        <h2 th:text="${#temporals.format(entry.key, 'EEEE, dd.MM.yyyy')}">Дата</h2>
+        <ul>
+            <li th:each="reservation : ${entry.value}">
+                <span th:text="${#temporals.format(reservation.startTime, 'HH:mm')}"></span> -
+                <span th:text="${#temporals.format(reservation.endTime, 'HH:mm')}"></span>
+                от <strong th:text="${reservation.user.username}"></strong>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
