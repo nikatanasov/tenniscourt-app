@@ -37,7 +37,6 @@ public class UserController {
         modelAndView.addObject("editProfileRequest", EditProfileRequest.builder()
                         .username(user.getUsername())
                         .email(user.getEmail())
-                        .password(user.getPassword())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
                         .profilePicture(user.getProfilePicture())
@@ -49,21 +48,14 @@ public class UserController {
     @PutMapping("/profile/edit")
     public ModelAndView editUserProfile(@Valid EditProfileRequest editProfileRequest, BindingResult bindingResult, @AuthenticationPrincipal AuthenticationMetadata authenticationMetadata){
         User user = userService.getById(authenticationMetadata.getUserId());
-        /*ModelAndView modelAndView = new ModelAndView();
+        ModelAndView modelAndView = new ModelAndView();
+
         if(bindingResult.hasErrors()){
-            //ModelAndView modelAndView = new ModelAndView();
             modelAndView.setViewName("edit-profile");
-            modelAndView.addObject("editProfileRequest", EditProfileRequest.builder()
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .password(user.getPassword())
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .profilePicture(user.getProfilePicture())
-                    .build());
+            modelAndView.addObject("editProfileRequest", editProfileRequest);
             return modelAndView;
-        }*/
-        //User user = userService.getById(authenticationMetadata.getUserId());
+        }
+
         userService.editProfile(user, editProfileRequest);
         return new ModelAndView("redirect:/home");
     }

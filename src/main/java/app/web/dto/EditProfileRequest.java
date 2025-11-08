@@ -2,6 +2,7 @@ package app.web.dto;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,6 @@ public class EditProfileRequest {
     @URL
     private String profilePicture;
 
-    @Size(min = 6, message = "Password must be at least 6 symbols!")
-    private String password;
+    @Pattern(regexp = "^$|.{6,}$", message = "Password must be at least 6 symbols if provided!")
+    private String newPassword;
 }

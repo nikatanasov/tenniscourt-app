@@ -131,7 +131,7 @@ public class UserServiceUTest {
                 .username("ivan123")
                 .email("ivan123@abv.bg")
                 .profilePicture("https://www.nhm.ac.uk/content/dam/nhm-www/discover/human-evolution/homo-sapien-model-close-up-hero.jpg.thumb.1160.1160.png")
-                .password("123123")
+                .newPassword("123123")
                 .build();
 
         NotificationPreference preference = NotificationPreference.builder()

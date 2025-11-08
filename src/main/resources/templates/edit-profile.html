@@ -56,11 +56,11 @@
 
         <!-- Password -->
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input type="password" id="password" th:field="*{password}"
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                   >
-            <p class="text-red-500 text-sm" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">New password</label>
+            <input type="password" id="newPassword" th:field="*{newPassword}"
+                   placeholder="Leave empty to keep current password"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <p class="text-red-500 text-sm" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p>
         </div>
 
         <!-- Buttons -->
