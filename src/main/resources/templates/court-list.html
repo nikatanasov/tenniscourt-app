@@ -134,10 +134,10 @@
                 <p th:if="${#lists.isEmpty(reservationsMap[court.id])}">Няма резервации за днес</p>
             </div>
 
-            <form th:action="@{'/courts/upcoming-reservations/' + ${court.id}}" th:method="GET">
+            <form th:action="@{'/courts/' + ${court.id} + '/reservations/upcoming'}" th:method="GET">
                 <button type="submit" class="reserve-btn" style="background-color: #007bff;">Виж резервациите за следващите 7 дена</button>
             </form>
-            <form th:action="@{'/courts/reserve/' + ${court.id}}" th:method="GET">
+            <form th:action="@{'/courts/' + ${court.id} + '/reservations'}" th:method="GET">
                 <button type="submit" class="reserve-btn">Резервирай</button>
             </form>
         </div>

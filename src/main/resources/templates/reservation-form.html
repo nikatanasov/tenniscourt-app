@@ -64,6 +64,11 @@
         <option value="4">4 часа</option>
     </select>
     <div class="error" th:if="${#fields.hasErrors('hoursOfGame')}" th:errors="*{hoursOfGame}"></div>
+    <label for="isTraining" style="display: block; margin-top: 10px;">
+        <input type="checkbox" id="isTraining" th:field="*{training}" />
+        Запази като тренировка (цена: 40 лв)
+    </label>
+
     <div th:if="${errorMessage}" style="color: red; font-weight: bold; margin-bottom: 1em;">
         <p th:text="${errorMessage}"></p>
     </div>

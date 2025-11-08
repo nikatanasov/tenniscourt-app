@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Моите тренировки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .no-trainings {
+            margin-top: 20px;
+            color: #777;
+            font-style: italic;
+        }
+
+        .status-active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-cancelled {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: blue;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .home-btn {
+            float: right;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .home-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="position: relative;">
+    Моите тренировки
+    <a th:href="@{/home}" class="home-btn">Начало</a>
+</h1>
+
+<div th:if="${trainings.isEmpty()}" class="no-trainings">
+    Нямате записани тренировки.
+</div>
+
+<table th:if="${!trainings.isEmpty()}">
+    <thead>
+    <tr>
+        <th>Корт</th>
+        <th>Начало</th>
+        <th>Край</th>
+        <th>Статус</th>
+        <th>Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="training : ${trainings}">
+        <td th:text="${training.courtName}">Корт 1</td>
+        <td th:text="${#temporals.format(training.startTime, 'dd.MM.yyyy HH:mm')}">01.01.2025 10:00</td>
+        <td th:text="${#temporals.format(training.endTime, 'dd.MM.yyyy HH:mm')}">01.01.2025 11:00</td>
+        <td th:text="${training.status}"
+            th:classappend="'status-' + ${training.status.toString().toLowerCase()}">ACTIVE</td>
+        <td>
+            <form th:action="@{'/trainings/' + ${training.id}}" th:method="PUT"
+                  th:if="${training.status == 'BOOKED'}">
+                <button type="submit" class="cancel-btn">Отмени</button>
+            </form>
+            <span th:if="${training.status != 'BOOKED'}" style="color: gray;">-</span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

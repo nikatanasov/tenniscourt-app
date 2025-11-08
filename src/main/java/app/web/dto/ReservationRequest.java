@@ -24,5 +24,5 @@ public class ReservationRequest {
     @Max(4)
     private int hoursOfGame;
 
-
+    private boolean training;
 }

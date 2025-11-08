@@ -5,6 +5,7 @@ import app.court.service.CourtService;
 import app.reservation.model.Reservation;
 import app.reservation.service.ReservationService;
 import app.security.AuthenticationMetadata;
+import app.training_session.service.TrainingSessionService;
 import app.user.model.User;
 import app.user.service.UserService;
 import app.web.dto.ReservationRequest;
@@ -33,12 +34,14 @@ public class CourtController {
     private final UserService userService;
     private final CourtService courtService;
     private final ReservationService reservationService;
+    private final TrainingSessionService trainingSessionService;
 
     @Autowired
-    public CourtController(UserService userService, CourtService courtService, ReservationService reservationService) {
+    public CourtController(UserService userService, CourtService courtService, ReservationService reservationService, TrainingSessionService trainingSessionService) {
         this.userService = userService;
         this.courtService = courtService;
         this.reservationService = reservationService;
+        this.trainingSessionService = trainingSessionService;
     }
 
     @GetMapping
@@ -69,10 +72,10 @@ public class CourtController {
     }
 
     @PostMapping("/{id}/reservations")
-    public ModelAndView processReservation(@PathVariable UUID id, @Valid ReservationRequest reservationRequest, BindingResult bindingResult, @AuthenticationPrincipal AuthenticationMetadata authenticationMetadata){
+    public ModelAndView processReservation(@PathVariable UUID id, @Valid ReservationRequest reservationRequest, BindingResult bindingResult, @AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
         Court court = courtService.findById(id);
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.addObject("reservationRequest", reservationRequest);
             modelAndView.addObject("court", court);
@@ -81,13 +84,20 @@ public class CourtController {
         }
 
         User user = userService.getById(authenticationMetadata.getUserId());
+
+        if (reservationRequest.isTraining()) {
+            trainingSessionService.bookSession(user.getId(), court.getName(), reservationRequest.getStartTime(), reservationRequest.getStartTime().plusHours(reservationRequest.getHoursOfGame()));
+            userService.subtractMoneyForTraining(user);
+            return new ModelAndView("redirect:/trainings");
+        }
+
         boolean result = reservationService.createNewReservation(reservationRequest, court, user);
 
-        if(!result){
+        if (!result) {
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.addObject("reservationRequest", reservationRequest);
             modelAndView.addObject("court", court);
-            modelAndView.addObject("errorMessage", "The court is reserved at that time or the court center is closed!");
+            modelAndView.addObject("errorMessage", "The court is reserved at that time or the court center is closed or balance of wallet is less than reservation amount!!");
             modelAndView.setViewName("reservation-form");
             return modelAndView;
         }

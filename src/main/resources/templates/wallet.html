@@ -59,7 +59,7 @@
     <div class="balance">
         Баланс: <span th:text="${wallet.balance}">0.00</span> лв.
     </div>
-    <form th:action="@{/wallet/money-add}" th:method="post">
+    <form th:action="@{/wallet/top-up}" th:method="post">
         <button type="submit">Добави 30 лв.</button>
     </form>
 </div>
