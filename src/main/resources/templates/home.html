@@ -110,7 +110,6 @@
 
         <a th:href="@{/wallet}">Портмоне</a>
         <a th:href="@{/courts}">Виж налични кортове</a>
-        <a th:href="@{/trainings}">Тренировки</a>
         <a th:if="${user.role.name() == 'ADMIN'}" th:href="@{/reservations/all}">
             Всички резервации
         </a>

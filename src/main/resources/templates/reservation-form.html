@@ -51,28 +51,37 @@
     <p><strong>Цена на час:</strong> <span th:text="${court.pricePerHour}">0</span> лв.</p>
 </div>
 
-<form th:action="@{'/courts/' + ${court.id} + '/reservations'}" th:method="post" th:object="${reservationRequest}">
-    <label for="startTime">Начален час:</label>
-    <input type="datetime-local" id="startTime" th:field="*{startTime}" required />
-    <div class="error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+<div style="display: flex; gap: 40px; align-items: flex-start;">
 
-    <label for="hoursOfGame">Продължителност (часове):</label>
-    <select id="hoursOfGame" th:field="*{hoursOfGame}">
-        <option value="1">1 час</option>
-        <option value="2">2 часа</option>
-        <option value="3">3 часа</option>
-        <option value="4">4 часа</option>
-    </select>
-    <div class="error" th:if="${#fields.hasErrors('hoursOfGame')}" th:errors="*{hoursOfGame}"></div>
-    <label for="isTraining" style="display: block; margin-top: 10px;">
-        <input type="checkbox" id="isTraining" th:field="*{training}" />
-        Запази като тренировка (цена: 40 лв)
-    </label>
+    <form th:action="@{'/courts/' + ${court.id} + '/reservations'}"
+          th:method="post"
+          th:object="${reservationRequest}"
+          style="display: flex; flex-direction: column; gap: 1em; width: 320px;">
 
-    <div th:if="${errorMessage}" style="color: red; font-weight: bold; margin-bottom: 1em;">
-        <p th:text="${errorMessage}"></p>
-    </div>
-    <button type="submit">Резервирай</button>
-</form>
+        <h3>Резервирай корт</h3>
+
+        <label for="startTime">Начален час:</label>
+        <input type="datetime-local" id="startTime" th:field="*{startTime}" required />
+        <div class="error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+
+        <label for="hoursOfGame">Продължителност (часове):</label>
+        <select id="hoursOfGame" th:field="*{hoursOfGame}">
+            <option value="1">1 час</option>
+            <option value="2">2 часа</option>
+            <option value="3">3 часа</option>
+            <option value="4">4 часа</option>
+        </select>
+        <div class="error" th:if="${#fields.hasErrors('hoursOfGame')}" th:errors="*{hoursOfGame}"></div>
+
+        <div th:if="${errorMessage}" style="color: red; font-weight: bold;">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+        <button type="submit"
+                style="background-color: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px;">
+            Резервирай
+        </button>
+    </form>
+</div>
 </body>
 </html>
