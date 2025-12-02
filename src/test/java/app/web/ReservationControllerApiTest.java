@@ -91,7 +91,7 @@ public class ReservationControllerApiTest {
 
         when(userService.getById(any())).thenReturn(user);
         when(reservationService.getAllReservationForUser(user)).thenReturn(List.of(reservation1, reservation2));
-        MockHttpServletRequestBuilder request = get("/reservations/my")
+        MockHttpServletRequestBuilder request = get("/reservations/me")
                 .with(user(new AuthenticationMetadata(user.getId(), user.getUsername(), user.getPassword(), user.getRole(), user.isActive())));
 
         mockMvc.perform(request)

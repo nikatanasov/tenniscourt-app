@@ -26,8 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProductController.class)
@@ -68,7 +67,7 @@ public class ProductControllerApiTest {
     @Test
     void postRequestToProcessAddingNewProductForAdmin_happyPath() throws Exception {
         when(userService.getById(any())).thenReturn(aRandomUser());
-        MockHttpServletRequestBuilder request = post("/products/add")
+        MockHttpServletRequestBuilder request = post("/products/new")
                 .formField("name", "Water")
                 .formField("price", "2.00")
                 .formField("quantity", "1")
@@ -89,7 +88,7 @@ public class ProductControllerApiTest {
     void getRequestToAddProductsPageForAdmins_ShouldReturnAddProductsPage() throws Exception {
         when(userService.getById(any())).thenReturn(aRandomUser());
 
-        MockHttpServletRequestBuilder request = get("/products/add")
+        MockHttpServletRequestBuilder request = get("/products/new")
                 .with(user(new AuthenticationMetadata(UUID.randomUUID(), "Vik123", "123123", UserRole.ADMIN, true)));
 
         mockMvc.perform(request)
@@ -112,7 +111,7 @@ public class ProductControllerApiTest {
 
         when(userService.getById(any())).thenReturn(aRandomUser());
         when(productService.getProductById(any())).thenReturn(product);
-        MockHttpServletRequestBuilder request = post("/products/add-to-cart/{id}", product.getId())
+        MockHttpServletRequestBuilder request = post("/products/cart/{id}", product.getId())
                 .with(user(new AuthenticationMetadata(UUID.randomUUID(), "Vik123", "123123", UserRole.USER, true)))
                 .with(csrf());
 
@@ -136,7 +135,7 @@ public class ProductControllerApiTest {
 
         when(userService.getById(any())).thenReturn(aRandomUser());
         when(productService.getProductById(any())).thenReturn(product);
-        MockHttpServletRequestBuilder request = post("/products/cart/remove/{id}", product.getId())
+        MockHttpServletRequestBuilder request = delete("/products/cart/{id}", product.getId())
                 .with(user(new AuthenticationMetadata(UUID.randomUUID(), "Vik123", "123123", UserRole.USER, true)))
                 .with(csrf());
 
