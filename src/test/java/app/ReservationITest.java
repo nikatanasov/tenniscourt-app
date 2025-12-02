@@ -2,13 +2,17 @@ package app;
 
 import app.court.model.Court;
 import app.court.repository.CourtRepository;
+import app.exceptions.ReservationTimeException;
+import app.exceptions.WalletInactiveException;
 import app.reservation.model.Reservation;
 import app.reservation.service.ReservationService;
 import app.user.model.User;
 import app.user.model.UserRole;
+import app.user.repository.UserRepository;
 import app.user.service.UserService;
 import app.wallet.model.Wallet;
 import app.wallet.model.WalletStatus;
+import app.wallet.repository.WalletRepository;
 import app.web.dto.RegisterRequest;
 import app.web.dto.ReservationRequest;
 import org.junit.jupiter.api.Test;
@@ -40,7 +44,12 @@ public class ReservationITest {
     private CourtRepository courtRepository;
 
     @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void createNewReservation_happyPath() {
@@ -67,16 +76,11 @@ public class ReservationITest {
                 .confirmPassword("123123")
                 .build();
         User user = userService.registerUser(registerRequest);
-        boolean result = reservationService.createNewReservation(request, court, user);
-        assertTrue(result);
+        Reservation result = reservationService.createNewReservation(request, court, user);
         List<Reservation> reservations = reservationService.getAllReservationForUser(user);
-        assertEquals(reservations.size(), 1);
+        assertEquals(1, reservations.size());
         Reservation reservation = reservations.get(0);
         assertEquals(reservation.getCourt().getId(), court.getId());
-        /*assertTrue(
-                reservation.getTotalPrice()
-                        .compareTo(court.getPricePerHour().multiply(BigDecimal.valueOf(request.getHoursOfGame()))) == 0
-        );*/
         assertEquals(reservation.getStartTime().truncatedTo(ChronoUnit.SECONDS), request.getStartTime().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(reservation.getEndTime().truncatedTo(ChronoUnit.SECONDS), request.getStartTime().plusHours(request.getHoursOfGame()).truncatedTo(ChronoUnit.SECONDS));
     }
@@ -106,8 +110,7 @@ public class ReservationITest {
                 .confirmPassword("123123")
                 .build();
         User user = userService.registerUser(registerRequest);
-        boolean result = reservationService.createNewReservation(request, court, user);
-        assertFalse(result);
+        assertThrows(ReservationTimeException.class ,() -> reservationService.createNewReservation(request, court, user));
     }
 
     @Test
@@ -135,8 +138,7 @@ public class ReservationITest {
                 .confirmPassword("123123")
                 .build();
         User user = userService.registerUser(registerRequest);
-        boolean result = reservationService.createNewReservation(request, court, user);
-        assertFalse(result);
+        assertThrows(ReservationTimeException.class ,() -> reservationService.createNewReservation(request, court, user));
     }
 
     @Test
@@ -167,11 +169,10 @@ public class ReservationITest {
         user.setWallet(Wallet.builder()
                         .status(WalletStatus.INACTIVE)
                         .build());
-        boolean result = reservationService.createNewReservation(request, court, user);
-        assertFalse(result);
+        assertThrows(WalletInactiveException.class ,() -> reservationService.createNewReservation(request, court, user));
     }
 
-    /*@Test
+    @Test
     void getReservationsForToday_happyPath(){
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .username("Vik123")
@@ -180,6 +181,9 @@ public class ReservationITest {
                 .confirmPassword("123123")
                 .build();
         User user = userService.registerUser(registerRequest);
+
+        user.getWallet().setBalance(BigDecimal.valueOf(100));
+        walletRepository.save(user.getWallet());
 
         Court court = Court.builder()
                 .name("CenterCourt")
@@ -217,8 +221,8 @@ public class ReservationITest {
         reservationService.createNewReservation(request3, court, user);
 
         List<Reservation> reservations = reservationService.getReservationsForToday(court);
-        assertThat(reservations).hasSize(0);
-    }*/
+        assertThat(reservations).hasSize(3);
+    }
 
     @Test
     void getReservationsForNextSevenDays_happyPath(){
@@ -266,7 +270,6 @@ public class ReservationITest {
                 .hoursOfGame(1)
                 .build();
 
-        reservationService.createNewReservation(request1, court, user);
         reservationService.createNewReservation(request2, court, user);
         reservationService.createNewReservation(request3, court, user);
 
@@ -274,7 +277,7 @@ public class ReservationITest {
         assertEquals(2, reservations.size());
         assertTrue(reservations.containsKey(now.plusDays(3).toLocalDate()));
         assertTrue(reservations.containsKey(now.plusDays(4).toLocalDate()));
-
+        assertThrows(ReservationTimeException.class, () -> reservationService.createNewReservation(request1, court, user));
         assertEquals(1, reservations.get(now.plusDays(3).toLocalDate()).size());
         assertEquals(1, reservations.get(now.plusDays(4).toLocalDate()).size());
     }
