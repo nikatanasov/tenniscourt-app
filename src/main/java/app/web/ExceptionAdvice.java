@@ -1,6 +1,6 @@
 package app.web;
 
-import app.exceptions.UsernameAlreadyExistException;
+import app.exceptions.*;
 import app.user.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MissingRequestValueException;
@@ -22,6 +22,19 @@ public class ExceptionAdvice {
         String message = exception.getMessage();
         redirectAttributes.addFlashAttribute("usernameAlreadyExistMessage", message);
         return "redirect:/register";
+    }
+
+    @ExceptionHandler({
+            ReservationTimeException.class,
+            ReservationOverlapException.class,
+            WalletInactiveException.class,
+            InsufficientFundsException.class
+    })
+    public ModelAndView handleReservationErrors(RuntimeException exception){
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("exception-error");
+        modelAndView.addObject("errorMessage", exception.getMessage());
+        return modelAndView;
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

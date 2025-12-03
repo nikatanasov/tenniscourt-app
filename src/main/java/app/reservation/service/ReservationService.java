@@ -1,6 +1,10 @@
 package app.reservation.service;
 
 import app.court.model.Court;
+import app.exceptions.InsufficientFundsException;
+import app.exceptions.ReservationOverlapException;
+import app.exceptions.ReservationTimeException;
+import app.exceptions.WalletInactiveException;
 import app.notification.service.NotificationService;
 import app.reservation.model.Reservation;
 import app.reservation.model.ReservationStatus;
@@ -35,84 +39,54 @@ public class ReservationService {
     private final WalletService walletService;
     private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ReservationTimeValidator reservationTimeValidator;
+    private final ReservationPaymentProcessor reservationPaymentProcessor;
+    private final ReservationOverlapValidator reservationOverlapValidator;
+    private final ReservationNotificationPublisher reservationNotificationPublisher;
 
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository, TransactionService transactionService, WalletService walletService, NotificationService notificationService, ApplicationEventPublisher eventPublisher) {
+    public ReservationService(ReservationRepository reservationRepository, TransactionService transactionService, WalletService walletService, NotificationService notificationService, ApplicationEventPublisher eventPublisher, ReservationTimeValidator reservationTimeValidator, ReservationPaymentProcessor reservationPaymentProcessor, ReservationOverlapValidator reservationOverlapValidator, ReservationNotificationPublisher reservationNotificationPublisher) {
         this.reservationRepository = reservationRepository;
         this.transactionService = transactionService;
         this.walletService = walletService;
         this.notificationService = notificationService;
         this.eventPublisher = eventPublisher;
+        this.reservationTimeValidator = reservationTimeValidator;
+        this.reservationPaymentProcessor = reservationPaymentProcessor;
+        this.reservationOverlapValidator = reservationOverlapValidator;
+        this.reservationNotificationPublisher = reservationNotificationPublisher;
     }
 
     @Transactional
-    public boolean createNewReservation(ReservationRequest reservationRequest, Court court, User user) {
+    public Reservation createNewReservation(ReservationRequest reservationRequest, Court court, User user) {
         Wallet wallet = user.getWallet();
 
-
+        BigDecimal reservationTotalPrice = court.getPricePerHour().multiply(BigDecimal.valueOf(reservationRequest.getHoursOfGame()));
         LocalDateTime reservationStartTime = reservationRequest.getStartTime();
         LocalDateTime reservationEndTime = reservationRequest.getStartTime().plusHours(reservationRequest.getHoursOfGame());
-        //List<Reservation> futureReservationList = this.reservationRepository.findAll().stream().filter(r->r.getCourt().getName().equals(court.getName())).collect(Collectors.toList());
         List<Reservation> reservations = this.reservationRepository.findAllByCourtName(court.getName());
 
-        LocalTime openTime = LocalTime.of(9, 0);
-        LocalTime closeTime = LocalTime.of(21, 0);
-
-        if(reservationEndTime.toLocalTime().isAfter(closeTime) || reservationStartTime.toLocalTime().isBefore(openTime) || reservationStartTime.toLocalTime().isAfter(closeTime)){
-            return false;
-        }
-
-        if(reservationStartTime.toLocalDate().isAfter(LocalDate.now().plusDays(7))){
-            return false;
-        }
-
-        if(reservationStartTime.isBefore(LocalDateTime.now())){
-            return false;
-        }
+        reservationTimeValidator.validate(reservationStartTime, reservationEndTime, reservationTotalPrice, user);
 
         Reservation reservation = Reservation.builder()
                 .user(user)
                 .court(court)
                 .startTime(reservationRequest.getStartTime())
                 .endTime(reservationEndTime)
-                .totalPrice(court.getPricePerHour().multiply(BigDecimal.valueOf(reservationRequest.getHoursOfGame())))
-                .status(ReservationStatus.CONFIRMED)//CONFIRMED
+                .totalPrice(reservationTotalPrice)
+                .status(ReservationStatus.CONFIRMED)
                 .build();
 
-        for(Reservation f:reservations){
-            if(reservation.getStartTime().isBefore(f.getEndTime()) && reservation.getEndTime().isAfter(f.getStartTime())){
-                return false;
-            }
-        }
+        reservationOverlapValidator.validate(reservation, reservations, reservationTotalPrice, user);
 
-        if(wallet.getStatus() == WalletStatus.INACTIVE){
-            transactionService.createTransaction(reservation.getTotalPrice(), TransactionType.RESERVATION_PAYMENT, TransactionStatus.FAILED, "Reservation of court!", "Inactive wallet status!", LocalDateTime.now(), user, null);
-            return false;
-        }
+        reservationPaymentProcessor.validate(wallet, reservation, user);
 
-        if(reservation.getTotalPrice().compareTo(wallet.getBalance()) > 0){
-            transactionService.createTransaction(reservation.getTotalPrice(), TransactionType.RESERVATION_PAYMENT, TransactionStatus.FAILED, "Reservation of court!", "Balance of wallet is less than reservation amount!", LocalDateTime.now(), user, null);
-            return false;
-        }
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-        wallet.setBalance(wallet.getBalance().subtract(reservation.getTotalPrice()));
-        wallet.setUpdatedOn(LocalDateTime.now());
-        walletService.collectWallet(wallet);
-        reservationRepository.save(reservation);
-
-        notificationService.sendNotification(reservation.getUser().getId(), "Reservation of court "+reservation.getCourt().getName()+"!", "Successful reservation of court "+reservation.getCourt().getName()+" for user with email "+reservation.getUser().getEmail()+"!", "RESERVATION");
-
-        ReservationNotificationEvent event = ReservationNotificationEvent.builder()
-                .userId(reservation.getUser().getId())
-                .email(reservation.getUser().getEmail())
-                .totalPrice(reservation.getTotalPrice())
-                .courtName(reservation.getCourt().getName())
-                .build();
-
-        eventPublisher.publishEvent(event);
+        reservationNotificationPublisher.send(reservation);
 
         transactionService.createTransaction(reservation.getTotalPrice(), TransactionType.RESERVATION_PAYMENT, TransactionStatus.SUCCEEDED, "Successful reservation of court "+reservation.getCourt().getName()+" for "+reservationRequest.getHoursOfGame()+" hours!", null, LocalDateTime.now(), reservation.getUser(), null);
-        return true;
+        return savedReservation;
     }
 
     public List<Reservation> getReservationsForToday(Court court) {
@@ -142,5 +116,9 @@ public class ReservationService {
 
     public List<Reservation> getAllReservationForUser(User user) {
         return reservationRepository.findAllByUserId(user.getId());
+    }
+
+    public List<Reservation> getAllReservationsByCourtName(String courtName) {
+        return reservationRepository.findAllByCourtName(courtName);
     }
 }
